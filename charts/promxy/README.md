@@ -10,4 +10,3 @@ Helm Chart to easily deploy [Promxy](https://github.com/jacksontj/promxy).
 | `replicaCount`     | Number of POD replicas to deploy | `1` |
 | `resources`        | Promxy resource requests and limits | `{}` |
 | `config`           | Promxy YAML configuration | see `values.yaml` |
-
