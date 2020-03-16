@@ -1,0 +1,31 @@
+# Default chart values
+
+image:
+  repository: quay.io/jacksontj/promxy
+  tag: v0.0.58
+
+replicaCount: 1
+
+config:
+  ##
+  ## Regular prometheus configuration
+  ##
+  global:
+    evaluation_interval: 5s
+    external_labels:
+      source: promxy
+  # remote_write configuration is used by promxy as its local Appender, meaning all
+  # metrics promxy would "write" (not export) would be sent to this. Examples
+  # of this include: recording rules, metrics on alerting rules, etc.
+  remote_write:
+    - url: http://localhost:8083/receive
+  ##
+  ### Promxy configuration
+  ##
+  promxy:
+    server_groups:
+    - kubernetes_sd_configs:
+      - role: pod
+
+resources: {}
+

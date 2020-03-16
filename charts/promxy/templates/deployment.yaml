@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    {{- include "labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "matchLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: "promxy"
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
+        args:
+        - "--config=/etc/promxy/config.yaml"
+        - "--web.enable-lifecycle"
+        - "--log-level=warning"
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/promxy/
+          readOnly: true
+        ports:
+        - name: http
+          containerPort: 8082
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: 5
+          periodSeconds: 15
+      - name: "config-reloader"
+        image: "jimmidyson/configmap-reload:v0.1"
+        args:
+        - "--volume-dir=/etc/promxy"
+        - "--webhook-url=http://localhost:8082/-/reload"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 50Mi
+          limits:
+            cpu: 10m
+            memory: 50Mi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/promxy/
+          readOnly: true
+
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ template "fullname" . }}
