@@ -3,11 +3,11 @@ entries:
   promxy:
   - apiVersion: v1
     appVersion: 0.0.58
-    created: "2020-03-16T20:17:39.6662354+01:00"
+    created: "2020-03-16T20:41:29.4541546+01:00"
     description: Promxy - An aggregating proxy to enable HA prometheus
     digest: dde2f2e989512f4c833122a813a0f8ac8d90d97de82fbaeaa8686b023cf74bd6
     name: promxy
     urls:
-    - https://mhivestasoffshore.github.com/charts/promxy-0.0.1.tgz
+    - https://mhivestasoffshore.github.io/charts/promxy-0.0.1.tgz
     version: 0.0.1
-generated: "2020-03-16T20:17:39.6652347+01:00"
+generated: "2020-03-16T20:41:29.444151+01:00"
