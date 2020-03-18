@@ -11,6 +11,8 @@ spec:
       {{- include "matchLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
         {{- include "matchLabels" . | nindent 8 }}
     spec:
@@ -33,32 +35,16 @@ spec:
           containerPort: 8082
         readinessProbe:
           httpGet:
-            path: /
+            path: /graph
             port: http
           initialDelaySeconds: 5
           periodSeconds: 15
         livenessProbe:
           httpGet:
-            path: /
+            path: /graph
             port: http
           initialDelaySeconds: 5
           periodSeconds: 15
-      - name: "config-reloader"
-        image: "jimmidyson/configmap-reload:v0.1"
-        args:
-        - "--volume-dir=/etc/promxy"
-        - "--webhook-url=http://localhost:8082/-/reload"
-        resources:
-          requests:
-            cpu: 10m
-            memory: 50Mi
-          limits:
-            cpu: 10m
-            memory: 50Mi
-        volumeMounts:
-        - name: config-volume
-          mountPath: /etc/promxy/
-          readOnly: true
 
       volumes:
       - name: config-volume
