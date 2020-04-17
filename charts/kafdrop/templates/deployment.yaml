@@ -1,0 +1,100 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "chart.name" . }}
+    helm.sh/chart: {{ include "chart.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "chart.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "chart.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}        
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: KAFKA_BROKERCONNECT
+            value: "{{ .Values.kafka.brokerConnect }}"
+          - name: KAFKA_PROPERTIES
+            value: "{{ .Values.kafka.properties | b64enc }}"
+          - name: KAFKA_TRUSTSTORE
+            value: ""
+          - name: KAFKA_KEYSTORE
+            value: ""
+          - name: KAFKA_PROPERTIES_FILE
+            value: "kafka.properties"
+          - name: KAFKA_TRUSTSTORE_FILE
+            value: "kafka.truststore.ignore.jks"
+          - name: KAFKA_KEYSTORE_FILE
+            value: "kafka.keystore.ignore.jks"
+          - name: JVM_OPTS
+            value: "{{ .Values.jvm.opts }}"
+          - name: JMX_PORT
+            value: "{{ .Values.jmx.port }}"
+          - name: HOST
+            value: "{{ .Values.host }}"
+          - name: SERVER_SERVLET_CONTEXTPATH
+            value: "{{ .Values.server.servlet.contextPath | trimSuffix "/" }}"
+          - name: SERVER_PORT
+            value: "{{ .Values.server.port }}"
+          - name: CMD_ARGS
+            value: "{{ .Values.cmdArgs }}"
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: "{{ .Values.server.servlet.contextPath | trimSuffix "/" }}/actuator/health"
+              port: http
+            initialDelaySeconds: 180
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: "{{ .Values.server.servlet.contextPath | trimSuffix "/" }}/actuator/health"
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+            timeoutSeconds: 10
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+{{- if .Values.kafka.secret }}
+          volumeMounts:
+          - name: secret-volume
+            mountPath: /etc/kafka/secrets
+            readOnly: true
+{{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+{{- if .Values.kafka.secret }}
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: {{ .Values.kafka.secret }}
+{{- end }}
