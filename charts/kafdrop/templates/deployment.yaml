@@ -30,30 +30,33 @@ spec:
           env:
           - name: KAFKA_BROKERCONNECT
             value: "{{ .Values.kafka.brokerConnect }}"
-          - name: KAFKA_PROPERTIES
-            value: "{{ .Values.kafka.properties | b64enc }}"
-          - name: KAFKA_TRUSTSTORE
-            value: ""
-          - name: KAFKA_KEYSTORE
-            value: ""
           - name: KAFKA_PROPERTIES_FILE
             value: "kafka.properties"
-          - name: KAFKA_TRUSTSTORE_FILE
-            value: "kafka.truststore.ignore.jks"
-          - name: KAFKA_KEYSTORE_FILE
-            value: "kafka.keystore.ignore.jks"
           - name: JVM_OPTS
             value: "{{ .Values.jvm.opts }}"
           - name: JMX_PORT
             value: "{{ .Values.jmx.port }}"
+          {{- if .Values.host }}
           - name: HOST
             value: "{{ .Values.host }}"
+          {{- end }}
           - name: SERVER_SERVLET_CONTEXTPATH
             value: "{{ .Values.server.servlet.contextPath | trimSuffix "/" }}"
           - name: SERVER_PORT
             value: "{{ .Values.server.port }}"
-          - name: CMD_ARGS
-            value: "{{ .Values.cmdArgs }}"
+          command: ["/bin/sh", "-c"]
+          args:
+          - cp /etc/kafka/config/kafka.properties .;
+            {{- if hasKey .Values.kafka.properties "ssl.key.credentials" }}
+            echo ssl.key.password=`cat {{index .Values "kafka" "properties" "ssl.key.credentials"}}` >> kafka.properties;
+            {{- end }}
+            {{- if hasKey .Values.kafka.properties "ssl.keystore.credentials" }}
+            echo ssl.keystore.password=`cat {{index .Values "kafka" "properties" "ssl.keystore.credentials"}}` >> kafka.properties;
+            {{- end }}
+            {{- if hasKey .Values.kafka.properties "ssl.truststore.credentials" }}
+            echo ssl.truststore.password=`cat {{index .Values "kafka" "properties" "ssl.truststore.credentials"}}` >> kafka.properties;
+            {{- end }}
+            java --add-opens=java.base/sun.nio.ch=ALL-UNNAMED -Xss256K $JVM_OPTS -jar /kafdrop*/kafdrop*jar
           ports:
             - name: http
               containerPort: 9000
@@ -74,8 +77,11 @@ spec:
             timeoutSeconds: 10
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-{{- if .Values.kafka.secret }}
           volumeMounts:
+          - name: config-volume
+            mountPath: /etc/kafka/config
+            readOnly: true
+{{- if .Values.kafka.secret }}
           - name: secret-volume
             mountPath: /etc/kafka/secrets
             readOnly: true
@@ -92,8 +98,11 @@ spec:
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
-{{- if .Values.kafka.secret }}
       volumes:
+      - name: config-volume
+        configMap:
+          name: {{ include "chart.fullname" . }}
+{{- if .Values.kafka.secret }}
       - name: secret-volume
         secret:
           secretName: {{ .Values.kafka.secret }}
