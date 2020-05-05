@@ -1,0 +1,212 @@
+
+config:
+  grpc_server_max_msg_size: '104857600' # 100 MiB
+  querierConcurrency: 16
+  http_listen_port: 80
+
+  # Ingester
+  replication_factor: 3
+  index_period_hours: 168
+
+  cassandra:
+    addresses: ''
+
+  azure:
+    account_name: ''
+    container_name: ''
+    account_key: ''
+
+distributor:
+  name: distributor
+  replicaCount: 3
+  image:
+    repository: grafana/loki
+    tag: 1.4.1
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: "app.kubernetes.io/name"
+              operator: In
+              values:
+              - "{{ include "name" . }}"
+            - key: "app.kubernetes.io/instance"
+              operator: In
+              values:
+              - "{{ .Release.Name }}"
+            - key: "app.kubernetes.io/component"
+              operator: In
+              values:
+              - "distributor"
+  resources:
+    requests:
+      cpu: 500m
+      memory: 500Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
+
+ingester:
+  name: ingester
+  replicaCount: 3
+  image:
+    repository: grafana/loki
+    tag: 1.4.1
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: "app.kubernetes.io/name"
+              operator: In
+              values:
+              - "{{ include "name" . }}"
+            - key: "app.kubernetes.io/instance"
+              operator: In
+              values:
+              - "{{ .Release.Name }}"
+            - key: "app.kubernetes.io/component"
+              operator: In
+              values:
+              - "ingester"
+  resources:
+    requests:
+      cpu: 1
+      memory: 5Gi
+    limits:
+      cpu: 2
+      memory: 10Gi
+
+querier:
+  name: querier
+  replicaCount: 3
+  image:
+    repository: grafana/loki
+    tag: 1.4.1
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: "app.kubernetes.io/name"
+              operator: In
+              values:
+              - "{{ include "name" . }}"
+            - key: "app.kubernetes.io/instance"
+              operator: In
+              values:
+              - "{{ .Release.Name }}"
+            - key: "app.kubernetes.io/component"
+              operator: In
+              values:
+              - "querier"
+  resources: {}
+
+query_frontend:
+  name: query-frontend
+  replicaCount: 2
+  image:
+    repository: grafana/loki
+    tag: 1.4.1
+  affinity: |
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchExpressions:
+            - key: "app.kubernetes.io/name"
+              operator: In
+              values:
+              - "{{ include "name" . }}"
+            - key: "app.kubernetes.io/instance"
+              operator: In
+              values:
+              - "{{ .Release.Name }}"
+            - key: "app.kubernetes.io/component"
+              operator: In
+              values:
+              - "query-frontend"
+  resources:
+    requests:
+      cpu: 2
+      memory: 600Mi
+    limits:
+      memory: 1200Mi
+
+table_manager:
+  name: table-manager
+  replicaCount: 1
+  image:
+    repository: grafana/loki
+    tag: 1.4.1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 200m
+      memory: 200Mi
+
+memcached:
+  memcached:
+    maxItemMemory: 4096
+    extraArgs:
+    - '-I 2m'
+  resources:
+    requests:
+      cpu: 500m
+      memory: 5Gi
+    limits:
+      cpu: 1
+      memory: 6Gi
+
+memcached-index-queries:
+  memcached:
+    maxItemMemory: 1024
+    extraArgs:
+    - '-I 5m'
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1280Mi
+    limits:
+      cpu: 1
+      memory: 1536Mi
+
+memcached-index-writes:
+  memcached:
+    maxItemMemory: 1024
+    extraArgs:
+    - '-I 1m'
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1280Mi
+    limits:
+      cpu: 1
+      memory: 1536Mi
+
+memcached-frontend:
+  memcached:
+    maxItemMemory: 1024
+    extraArgs:
+    - '-I 5m'
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1280Mi
+    limits:
+      cpu: 1
+      memory: 1536Mi

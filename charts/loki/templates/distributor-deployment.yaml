@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "distributor.fullname" . }}
+  labels:
+    {{- include "distributor.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.distributor.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "distributor.matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "distributor.matchLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: "distributor"
+        image: "{{ .Values.distributor.image.repository }}:{{ .Values.distributor.image.tag }}"
+        imagePullPolicy: {{ default "IfNotPresent" .Values.distributor.image.pullPolicy }}
+        args:
+        - -config.file=/etc/loki/config/config.yaml
+        - -limits.per-user-override-config=/etc/loki/config/overrides.yaml
+        - -target=distributor
+        resources:
+{{ toYaml .Values.distributor.resources | indent 10 }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/loki/config
+          readOnly: true
+        ports:
+        - name: http-metrics
+          containerPort: {{ .Values.config.http_listen_port }}
+        - name: grpc
+          containerPort: 9095
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http-metrics
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: http-metrics
+          initialDelaySeconds: 15
+          periodSeconds: 15
+{{- if .Values.distributor.affinity }}
+      affinity:
+{{ tpl .Values.distributor.affinity . | indent 8 }}
+{{- end }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ template "fullname" . }}

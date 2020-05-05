@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "ingester.fullname" . }}
+  labels:
+    {{- include "ingester.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.ingester.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ingester.matchLabels" . | nindent 6 }}
+  minReadySeconds: 60
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+      labels:
+        {{- include "ingester.matchLabels" . | nindent 8 }}
+    spec:
+      terminationGracePeriodSeconds: 4800
+      containers:
+      - name: "ingester"
+        image: "{{ .Values.ingester.image.repository }}:{{ .Values.ingester.image.tag }}"
+        imagePullPolicy: {{ default "IfNotPresent" .Values.ingester.image.pullPolicy }}
+        args:
+        - -config.file=/etc/loki/config/config.yaml
+        - -limits.per-user-override-config=/etc/loki/config/overrides.yaml
+        - -target=ingester
+        resources:
+{{ toYaml .Values.ingester.resources | indent 10 }}
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/loki/config
+          readOnly: true
+        ports:
+        - name: http-metrics
+          containerPort: {{ .Values.config.http_listen_port }}
+        - name: grpc
+          containerPort: 9095
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http-metrics
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: http-metrics
+          initialDelaySeconds: 15
+          periodSeconds: 15
+{{- if .Values.ingester.affinity }}
+      affinity:
+{{ tpl .Values.ingester.affinity . | indent 8 }}
+{{- end }}
+      volumes:
+      - name: config-volume
+        configMap:
+          name: {{ template "fullname" . }}
