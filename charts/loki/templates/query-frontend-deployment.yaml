@@ -28,7 +28,7 @@ spec:
         resources:
 {{ toYaml .Values.query_frontend.resources | indent 10 }}
         volumeMounts:
-        - name: config-volume
+        - name: loki
           mountPath: /etc/loki/config
           readOnly: true
         ports:
@@ -53,6 +53,6 @@ spec:
 {{ tpl .Values.query_frontend.affinity . | indent 8 }}
 {{- end }}
       volumes:
-      - name: config-volume
+      - name: loki
         configMap:
           name: {{ template "fullname" . }}

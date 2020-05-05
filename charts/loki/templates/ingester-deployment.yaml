@@ -34,7 +34,7 @@ spec:
         resources:
 {{ toYaml .Values.ingester.resources | indent 10 }}
         volumeMounts:
-        - name: config-volume
+        - name: loki
           mountPath: /etc/loki/config
           readOnly: true
         ports:
@@ -59,6 +59,6 @@ spec:
 {{ tpl .Values.ingester.affinity . | indent 8 }}
 {{- end }}
       volumes:
-      - name: config-volume
+      - name: loki
         configMap:
           name: {{ template "fullname" . }}

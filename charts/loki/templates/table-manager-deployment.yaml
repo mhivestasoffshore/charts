@@ -27,7 +27,7 @@ spec:
         resources:
 {{ toYaml .Values.table_manager.resources | indent 10 }}
         volumeMounts:
-        - name: config-volume
+        - name: loki
           mountPath: /etc/loki/config
           readOnly: true
         ports:
@@ -48,6 +48,6 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 15
       volumes:
-      - name: config-volume
+      - name: loki
         configMap:
           name: {{ template "fullname" . }}
