@@ -84,7 +84,6 @@ app.kubernetes.io/component: {{ .Values.query_frontend.name }}
 {{ include "common.matchLabels" . }}
 {{- end -}}
 
-
 {{- define "table_manager.labels" -}}
 {{ include "table_manager.matchLabels" . }}
 {{ include "common.metaLabels" . }}
@@ -92,6 +91,16 @@ app.kubernetes.io/component: {{ .Values.query_frontend.name }}
 
 {{- define "table_manager.matchLabels" -}}
 app.kubernetes.io/component: {{ .Values.table_manager.name }}
+{{ include "common.matchLabels" . }}
+{{- end -}}
+
+{{- define "gateway.labels" -}}
+{{ include "gateway.matchLabels" . }}
+{{ include "common.metaLabels" . }}
+{{- end -}}
+
+{{- define "gateway.matchLabels" -}}
+app.kubernetes.io/component: {{ .Values.gateway.name }}
 {{ include "common.matchLabels" . }}
 {{- end -}}
 
@@ -176,6 +185,23 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .Release.Name .Values.table_manager.name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{- printf "%s-%s-%s" .Release.Name $name .Values.table_manager.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a fully qualified gateway name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "gateway.fullname" -}}
+{{- if .Values.gateway.fullnameOverride -}}
+{{- .Values.gateway.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.gateway.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.gateway.name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

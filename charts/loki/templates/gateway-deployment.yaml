@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "gateway.fullname" . }}
+  labels:
+    {{- include "gateway.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.gateway.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "gateway.matchLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "gateway.matchLabels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: "nginx"
+        image: "{{ .Values.gateway.image.repository }}:{{ .Values.gateway.image.tag }}"
+        imagePullPolicy: {{ default "IfNotPresent" .Values.gateway.image.pullPolicy }}
+        resources:
+{{ toYaml .Values.gateway.resources | indent 10 }}
+        volumeMounts:
+        - name: gateway-config
+          mountPath: /etc/nginx
+          readOnly: true
+        - name: gateway-secret
+          mountPath: /etc/nginx/secrets
+        ports:
+        - name: http
+          containerPort: 80
+      volumes:
+      - name: gateway-config
+        configMap:
+          name: {{ template "gateway.fullname" . }}
+      - name: gateway-secret
+        secret:
+          secretName: {{ template "gateway.fullname" . }}
+          defaultMode: 420

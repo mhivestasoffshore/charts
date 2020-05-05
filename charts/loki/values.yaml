@@ -3,6 +3,7 @@ config:
   grpc_server_max_msg_size: '104857600' # 100 MiB
   querierConcurrency: 16
   http_listen_port: 80
+  htpasswd_contents: ''
 
   # Ingester
   replication_factor: 3
@@ -158,6 +159,17 @@ table_manager:
     limits:
       cpu: 200m
       memory: 200Mi
+
+gateway:
+  name: gateway
+  replicaCount: 3
+  image:
+    repository: nginx
+    tag: 1.15.1-alpine
+  resources:
+    requests:
+      cpu: 50m
+      memory: 100Mi
 
 memcached:
   memcached:
