@@ -3,7 +3,7 @@ entries:
   kafdrop:
   - apiVersion: v1
     appVersion: 3.24.0
-    created: "2020-05-06T08:45:08.9464516+02:00"
+    created: "2020-05-06T12:12:55.2946322+02:00"
     description: Kafdrop – Kafka Web UI
     digest: d16855fe485f09b7c8f3554ef77dc97f3be27be03c80717c7221ccb69c883812
     name: kafdrop
@@ -13,7 +13,16 @@ entries:
   loki:
   - apiVersion: v1
     appVersion: 1.4.1
-    created: "2020-05-06T08:45:08.947451+02:00"
+    created: "2020-05-06T12:12:55.3127643+02:00"
+    description: Grafana Loki
+    digest: 12dad839bc4b31c4ebe82fb4276d2257d82e047b809df1430efadf9052abe148
+    name: loki
+    urls:
+    - https://mhivestasoffshore.github.io/charts/loki-0.0.2.tgz
+    version: 0.0.2
+  - apiVersion: v1
+    appVersion: 1.4.1
+    created: "2020-05-06T12:12:55.3077558+02:00"
     description: Grafana Loki
     digest: b495183ae618d5ce0ff0fdf2b98135bedd7708f6d9a0599821beee80fb7a70d4
     name: loki
@@ -23,7 +32,7 @@ entries:
   promxy:
   - apiVersion: v1
     appVersion: 0.0.58
-    created: "2020-05-06T08:45:08.9594497+02:00"
+    created: "2020-05-06T12:12:55.3247666+02:00"
     description: Promxy - An aggregating proxy to enable HA prometheus
     digest: b16f21be48f11f94b5c2478875071611f6181ac0e97bcc9eeb437639d9276dcf
     name: promxy
@@ -32,11 +41,11 @@ entries:
     version: 0.0.2
   - apiVersion: v1
     appVersion: 0.0.58
-    created: "2020-05-06T08:45:08.9524492+02:00"
+    created: "2020-05-06T12:12:55.3177626+02:00"
     description: Promxy - An aggregating proxy to enable HA prometheus
     digest: dde2f2e989512f4c833122a813a0f8ac8d90d97de82fbaeaa8686b023cf74bd6
     name: promxy
     urls:
     - https://mhivestasoffshore.github.io/charts/promxy-0.0.1.tgz
     version: 0.0.1
-generated: "2020-05-06T08:45:08.9354513+02:00"
+generated: "2020-05-06T12:12:55.2707756+02:00"
