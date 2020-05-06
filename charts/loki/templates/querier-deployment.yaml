@@ -24,6 +24,7 @@ spec:
         - -config.file=/etc/loki/config/config.yaml
         - -limits.per-user-override-config=/etc/loki/config/overrides.yaml
         - -target=querier
+        - -querier.frontend-address={{ .Release.Name }}-query-frontend.{{ .Release.Namespace }}.svc.cluster.local:9095
         resources:
 {{ toYaml .Values.querier.resources | indent 10 }}
         volumeMounts:
