@@ -20,7 +20,6 @@ data:
       max_outstanding_per_tenant: 200
       log_queries_longer_than: '5s'
     frontend_worker:
-      frontend_address: 'query-frontend.{{ .Release.Namespace }}.svc.cluster.local:9095'
       # Limit to N/2 worker threads per frontend, as we have two frontends.
       parallelism: {{ div .Values.config.querierConcurrency 2 }}
       grpc_client_config:
@@ -36,7 +35,7 @@ data:
           memcached_client:
             timeout: '500ms'
             consistent_hash: true
-            service: 'memcached-client'
+            service: 'memcache'
             host: '{{ .Release.Name }}-memcached-frontend.{{ .Release.Namespace }}.svc.cluster.local'
             update_interval: '1m'
             max_idle_conns: 16
@@ -65,8 +64,6 @@ data:
             store: 'consul'
             consul:
               host: '{{ .Release.Name }}-consul.{{ .Release.Namespace }}.svc.cluster.local:8500'
-              http_client_timeout: '20s'
-              consistent_reads: true
         num_tokens: 512
         heartbeat_period: '5s'
         join_after: '30s'
@@ -83,7 +80,7 @@ data:
           parallelism: 100
         memcached_client:
           host: '{{ .Release.Name }}-memcached-index-queries.{{ .Release.Namespace }}.svc.cluster.local'
-          service: 'memcached-client'
+          service: 'memcache'
           consistent_hash: true
 
       cassandra:
@@ -103,7 +100,7 @@ data:
 
         memcached_client:
           host: '{{ .Release.Name }}-memcached.{{ .Release.Namespace }}.svc.cluster.local'
-          service: 'memcached-client'
+          service: 'memcache'
           consistent_hash: true
 
       write_dedupe_cache_config:
@@ -112,11 +109,10 @@ data:
           parallelism: 100
         memcached_client:
           host: '{{ .Release.Name }}-memcached-index-writes.{{ .Release.Namespace }}.svc.cluster.local'
-          service: 'memcached-client'
+          service: 'memcache'
           consistent_hash: true
       max_look_back_period: 0
 
-    # Default schema config is bigtable/gcs, this will need to be overridden for other stores
     schema_config:
       configs:
       - from: 2020-02-01
@@ -128,9 +124,8 @@ data:
           period: '{{ .Values.config.index_period_hours }}h'
 
     table_manager:
-      retention_period: 0,
+      retention_period: 0
       retention_deletes_enabled: false
-      poll_interval: '10m'
       creation_grace_period: '3h'
 
     distributor:
@@ -140,10 +135,6 @@ data:
           store: 'consul'
           consul:
             host: '{{ .Release.Name }}-consul.{{ .Release.Namespace }}.svc.cluster.local:8500'
-            http_client_timeout: '20s'
-            consistent_reads: false
-            watch_rate_limit: 1
-            watch_burst_size: 1
 
   overrides.yaml: |
     overrides: {}

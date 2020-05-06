@@ -41,12 +41,6 @@ spec:
             port: http-metrics
           initialDelaySeconds: 15
           periodSeconds: 15
-        livenessProbe:
-          httpGet:
-            path: /ready
-            port: http-metrics
-          initialDelaySeconds: 15
-          periodSeconds: 15
 {{- if .Values.querier.affinity }}
       affinity:
 {{ tpl .Values.querier.affinity . | indent 8 }}

@@ -36,18 +36,6 @@ spec:
           containerPort: {{ .Values.config.http_listen_port }}
         - name: grpc
           containerPort: 9095
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: http-metrics
-          initialDelaySeconds: 15
-          periodSeconds: 15
-        livenessProbe:
-          httpGet:
-            path: /ready
-            port: http-metrics
-          initialDelaySeconds: 15
-          periodSeconds: 15
 {{- if .Values.query_frontend.affinity }}
       affinity:
 {{ tpl .Values.query_frontend.affinity . | indent 8 }}
