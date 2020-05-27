@@ -2,10 +2,22 @@
 
 Repository contains a number of public Helm Charts maintained by MHI Vestas.
 
-## Current (Manual) Deployment
+* [kafdrop](charts/kafdrop)
+* [loki](charts/loki)
+* [promxy](charts/promxy)
+
+## Build using Bazel
+
+Generate Helm chart packages activating the package target, e.g.:
 
 ```sh
-helm package charts/promxy -d docs
-cd docs
-helm repo index --url https://mhivestasoffshore.github.io/charts/ --merge index.yaml .
+bazel build //charts/loki:package
 ```
+
+Generate repository index like so:
+
+```sh
+bazel build :generate_index
+```
+
+The resulting output is in `bazel-bin/generate_index`. This should be copied to docs and pushed to GitHub for deployment.

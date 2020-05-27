@@ -1,0 +1,8 @@
+load("//build:helm.bzl", "helm_index")
+
+helm_index(
+    name = "generate_index",
+    packages = ["//charts/kafdrop:package", "//charts/loki:package", "//charts/promxy:package"],
+    index = "docs/index.yaml",
+    url = "https://mhivestasoffshore.github.io/charts/",
+)
