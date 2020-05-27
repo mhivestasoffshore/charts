@@ -10,12 +10,12 @@ toolchain_type(
 
 helm_toolchain(
     name = "helm_windows",
-    tool_path = "@helm_windows_dist//:helm",
+    tool_path = "@helm_windows_dist//:helm_cmd",
 )
 
 helm_toolchain(
     name = "helm_linux",
-    tool_path = "@helm_linux_dist//:helm",
+    tool_path = "@helm_linux_dist//:helm_cmd",
 )
 
 toolchain(

@@ -1,6 +1,6 @@
 package(default_visibility = ['//visibility:public'])
 
 filegroup(
-    name = "helm",
+    name = "helm_cmd",
     srcs = ["helm"],
 )
