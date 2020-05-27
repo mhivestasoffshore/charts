@@ -10,17 +10,17 @@ toolchain_type(
 
 helm_toolchain(
     name = "helm_windows",
-    tool_path = "helm.exe",
+    tool_path = "@helm_windows_dist//:helm",
 )
 
 helm_toolchain(
     name = "helm_linux",
-    tool_path = "helm",
+    tool_path = "@helm_linux_dist//:helm",
 )
 
 toolchain(
     name = "helm_window_toolchain",
-        exec_compatible_with = [
+    exec_compatible_with = [
         "@platforms//os:windows",
         "@platforms//cpu:x86_64",
     ],
@@ -34,7 +34,7 @@ toolchain(
 
 toolchain(
     name = "helm_linux_toolchain",
-        exec_compatible_with = [
+    exec_compatible_with = [
         "@platforms//os:linux",
         "@platforms//cpu:x86_64",
     ],

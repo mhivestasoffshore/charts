@@ -15,7 +15,7 @@ def _helm_package_impl(ctx):
         inputs = ctx.files.srcs,
         outputs = [out_file],
         executable = "%s" % info.tool_path,
-        arguments = ["package", "--save=false", "--version=%s" % ctx.attr.version, "--app-version=%s" % ctx.attr.app_version, "-d", out_file.dirname, ctx.file.chart_yaml.dirname],
+        arguments = ["package", "--version=%s" % ctx.attr.version, "--app-version=%s" % ctx.attr.app_version, "-d", out_file.dirname, ctx.file.chart_yaml.dirname],
     )
     return [DefaultInfo(files = depset([out_file]))]
 
