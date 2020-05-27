@@ -26,6 +26,9 @@ jobs:
         mv bazelisk-linux-amd64 "${GITHUB_WORKSPACE}/bin/bazel"
         chmod +x "${GITHUB_WORKSPACE}/bin/bazel"
 
+    - name: Install Helm
+      uses: azure/setup-helm@v1
+
     - name: Build charts
       run: |
         "${GITHUB_WORKSPACE}/bin/bazel" build //charts/...
