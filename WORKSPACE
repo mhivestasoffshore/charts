@@ -11,7 +11,7 @@ http_archive(
 http_archive(
     name = 'helm_linux_dist',
     url = 'https://get.helm.sh/helm-v3.2.1-linux-amd64.tar.gz',
-    build_file = '//build/toolchains/helm:helm-linux.BUILD',
+    build_file = '//:helm-linux.BUILD',
     sha256 = "018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b",
     strip_prefix = "linux-amd64",
 )
