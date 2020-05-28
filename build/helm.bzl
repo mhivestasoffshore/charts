@@ -108,16 +108,16 @@ def helm_dependencies(ctx, chart_yaml, srcs, repos):
             dst = "%s%s" % (resolved_chart.path, dest_path(src, chart_yaml.dirname))
             dst_dir = _dirname(dst).replace("/", "\\")
             command += [
-                "mkdir -p %s" % dst_dir,
+                "mkdir -p \"%s\"" % dst_dir,
                 "cp -f \"%s\" \"%s\"\n" % (src.path, dst)
             ]
         command += ["$(location %s) dependency build %s --repository-config=%s" % (info.tool.label, resolved_chart.path, repo_config.path)]
-        command = ctx.expand_location(command, [info.tool])
+        cmd = ctx.expand_location("\n".join(command), [info.tool])
         ctx.actions.run_shell(
             progress_message = "Resolving dependencies for %s" % ctx.label.package,
             inputs = srcs + [repo_config],
             outputs = [resolved_chart],
-            command = "\n".join(command),
+            command = cmd,
             tools = [info.cmd],
             use_default_shell_env = True,
         )
