@@ -5,72 +5,131 @@ load(
     "copy",
 )
 
+load(
+    "@rules_pkg//:path.bzl",
+    "dest_path",
+)
+
 def helm_repos(ctx, srcs, repos):
+    """Add the given Helm repositories returning the resulting configuration file"""
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
     repo_config = ctx.actions.declare_file("repositories-%s.yaml" % ctx.label.name)
-    if ctx.attr.is_windows:
-        bat = ctx.actions.declare_file("helm-add-repo-%s.bat" % ctx.label.name)
-        content = ""
-        for name,url in repos.items():
-            content += "@%s repo add --repository-config=%s %s %s\r\n" % (
-                info.cmd.path.replace("/", "\\"),
-                repo_config.path.replace("/", "\\"),
-                name,
-                url,
+    if repos:
+        if ctx.attr.is_windows:
+            content = [
+                "@%s repo add --repository-config=%s %s %s" % (
+                    info.cmd.path.replace("/", "\\"),
+                    repo_config.path.replace("/", "\\"),
+                    name,
+                    url,
+                )
+                for name, url in repos.items()
+            ]
+            bat = ctx.actions.declare_file("helm-add-repo-%s.bat" % ctx.label.name)
+            ctx.actions.write(
+                content = "\r\n".join(content),
+                is_executable = True,
+                output = bat,
             )
+            ctx.actions.run(
+                progress_message = "Adding Helm repositories for %s" % ctx.label.package,
+                inputs = srcs,
+                outputs = [repo_config],
+                tools = [bat,info.cmd],
+                executable = "cmd.exe",
+                arguments = ["/C", bat.path.replace("/", "\\")],
+                use_default_shell_env = True,
+            )
+        else:
+            command = ""
+            for name,url in repos.items():
+                command += "$(location %s) repo add --repository-config=%s %s %s\n" % (
+                    info.tool.label,
+                    repo_config.path,
+                    name,
+                    url,
+                )
+            command = ctx.expand_location(command, [info.tool])
+            ctx.actions.run_shell(
+                progress_message = "Adding Helm repositories for %s" % ctx.label.package,
+                inputs = srcs,
+                outputs = [repo_config],
+                command = command,
+                tools = [info.cmd],
+                use_default_shell_env = True,
+            )
+    else:
         ctx.actions.write(
-            content = content,
+            content = "",
+            output = repo_config,
+        )
+
+    return repo_config
+
+def _dirname(path):
+    last_pkg = path.rfind("/")
+    if last_pkg == -1:
+        return ""
+    return path[:last_pkg]
+
+def helm_dependencies(ctx, chart_yaml, srcs, repos):
+    """Resolve dependencies for a specific Helm chart returning directory with resolved chart"""
+    info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo    
+    repo_config = helm_repos(ctx, srcs, repos)
+    resolved_chart = ctx.actions.declare_directory("resolved-%s" % ctx.label.name)
+    if ctx.attr.is_windows:
+        content = []
+        for src in srcs:
+            dst = "%s%s" % (resolved_chart.path, dest_path(src, chart_yaml.dirname))
+            dst_dir = _dirname(dst).replace("/", "\\")
+            content += [
+                "@if not exist \"%s\" mkdir %s >NUL" % (dst_dir, dst_dir),
+                "@copy /Y %s %s >NUL" % (src.path.replace("/", "\\"), dst.replace("/", "\\")),
+            ]
+        content += ["@%s dependency build %s --repository-config=%s" % (info.cmd.path.replace("/", "\\"), resolved_chart.path, repo_config.path)]
+        bat = ctx.actions.declare_file("helm-build-deps-%s.bat" % ctx.label.name)
+        ctx.actions.write(
+            content = "\r\n".join(content),
             is_executable = True,
             output = bat,
         )
         ctx.actions.run(
-            progress_message = "Adding Helm repositories for %s" % ctx.label.package,
-            inputs = srcs,
-            outputs = [repo_config],
+            progress_message = "Resolving dependencies for %s" % ctx.label.package,
+            inputs = srcs + [repo_config],
+            outputs = [resolved_chart],
             tools = [bat,info.cmd],
             executable = "cmd.exe",
             arguments = ["/C", bat.path.replace("/", "\\")],
             use_default_shell_env = True,
         )
     else:
-        command = "pwd\nls -l\n"
-        for name,url in repos.items():
-            command += "$(location %s) repo add --repository-config=%s %s %s\n" % (
-                info.tool.label,
-                repo_config.path,
-                name,
-                url,
-            )
+        command = []
+        for src in srcs:
+            dst = "%s%s" % (resolved_chart.path, dest_path(src, chart_yaml.dirname))
+            dst_dir = _dirname(dst).replace("/", "\\")
+            command += [
+                "mkdir -p %s" % dst_dir,
+                "cp -f \"%s\" \"%s\"\n" % (src.path, dst)
+            ]
+        command += ["$(location %s) dependency build %s --repository-config=%s" % (info.tool.label, resolved_chart.path, repo_config.path)]
         command = ctx.expand_location(command, [info.tool])
-        print ("command=%s" % command)
         ctx.actions.run_shell(
-            progress_message = "Adding Helm repositories for %s" % ctx.label.package,
-            inputs = srcs,
-            outputs = [repo_config],
-            command = command,
+            progress_message = "Resolving dependencies for %s" % ctx.label.package,
+            inputs = srcs + [repo_config],
+            outputs = [resolved_chart],
+            command = "\n".join(command),
             tools = [info.cmd],
             use_default_shell_env = True,
         )
 
-    return repo_config
+    return resolved_chart
 
 def _helm_package_impl(ctx):
     package = ctx.label.package.split("/")
     chart_name = package[len(package) - 1]
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
 
-    deps = []
-    if ctx.attr.repos:
-        repo_config = helm_repos(ctx, ctx.files.srcs, ctx.attr.repos)
-        dep_out = ctx.actions.declare_directory("deps-%s.out" % ctx.label.name)
-        ctx.actions.run(
-            progress_message = "Resolving dependencies for %s" % ctx.label.package,
-            inputs = ctx.files.srcs + [repo_config],
-            outputs = [dep_out],
-            executable = info.cmd,
-            arguments = ["dependency", "build", ctx.file.chart_yaml.dirname, "--repository-config=%s" % repo_config.path],
-        )
-        deps += [dep_out]
+    resolved_chart = helm_dependencies(ctx, ctx.file.chart_yaml, ctx.files.srcs, ctx.attr.repos)
 
     out_file = ctx.actions.declare_file("%s-%s.tgz" % (chart_name, ctx.attr.version))
     args = ctx.actions.args()
@@ -79,10 +138,10 @@ def _helm_package_impl(ctx):
     args.add("--app-version=%s" % ctx.attr.app_version)
     args.add("-d")
     args.add(out_file.dirname)
-    args.add(ctx.file.chart_yaml.dirname)
+    args.add(resolved_chart.path)
     ctx.actions.run(
         progress_message = "Running Helm package for %s" % ctx.label.package,
-        inputs = ctx.files.srcs + deps,
+        inputs = [resolved_chart],
         outputs = [out_file],
         executable = info.cmd,
         arguments = [args],
