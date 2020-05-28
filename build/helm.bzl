@@ -106,10 +106,8 @@ def helm_dependencies(ctx, chart_yaml, srcs, repos):
         command = []
         for src in srcs:
             dst = "%s%s" % (resolved_chart.path, dest_path(src, chart_yaml.dirname))
-            dst_dir = _dirname(dst).replace("/", "\\")
             command += [
-                "echo \"%s\"" % dst_dir,
-                "mkdir -p \"%s\"" % dst_dir,
+                "mkdir -p \"%s\"" % _dirname(dst),
                 "cp -f \"%s\" \"%s\"\n" % (src.path, dst)
             ]
         command += ["$(location %s) dependency build %s --repository-config=%s" % (info.tool.label, resolved_chart.path, repo_config.path)]
