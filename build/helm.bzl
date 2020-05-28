@@ -33,19 +33,22 @@ def helm_repos(ctx, srcs, repos):
             use_default_shell_env = True,
         )
     else:
-        command = ""
+        command = "pwd\nls -l\n"
         for name,url in repos.items():
-            command += "./%s repo add --repository-config=%s %s %s\n" % (
+            command += "$(location %s) repo add --repository-config=%s %s %s\n" % (
                 info.tool_path.path,
                 repo_config.path,
                 name,
                 url,
             )
+        command = ctx.expand_location(command, [info.tool_path])
+        print ("command=%s" % command)
         ctx.actions.run_shell(
             progress_message = "Adding Helm repositories for %s" % ctx.label.package,
             inputs = srcs,
             outputs = [repo_config],
             command = command,
+            tools = [info.tool_path],
             use_default_shell_env = True,
         )
 
