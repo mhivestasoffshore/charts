@@ -108,6 +108,7 @@ def helm_dependencies(ctx, chart_yaml, srcs, repos):
             dst = "%s%s" % (resolved_chart.path, dest_path(src, chart_yaml.dirname))
             dst_dir = _dirname(dst).replace("/", "\\")
             command += [
+                "echo \"%s\"" % dst_dir,
                 "mkdir -p \"%s\"" % dst_dir,
                 "cp -f \"%s\" \"%s\"\n" % (src.path, dst)
             ]
