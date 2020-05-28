@@ -6,6 +6,8 @@ Repository contains a number of public Helm Charts maintained by MHI Vestas.
 * [loki](charts/loki)
 * [promxy](charts/promxy)
 
+![CI](https://github.com/mhivestasoffshore/charts/workflows/CI/badge.svg)
+
 ## Build using Bazel
 
 Generate Helm chart packages activating the package target, e.g.:
