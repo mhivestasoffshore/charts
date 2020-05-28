@@ -29,7 +29,7 @@ def _helm_package_impl(ctx):
         inputs = ctx.files.srcs + repos,
         outputs = [dep_out],
         executable = info.tool_path,
-        arguments = ["dependency", "build", ctx.file.chart_yaml.dirname, "--log-file=%s" % dep_out],
+        arguments = ["dependency", "build", ctx.file.chart_yaml.dirname],
     )
 
     out_file = ctx.actions.declare_file("%s-%s.tgz" % (chart_name, ctx.attr.version))
