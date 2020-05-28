@@ -9,5 +9,8 @@ helm_package(
     chart_yaml = "Chart.yaml",
     version = VERSION,
     app_version = APP_VERSION,
+    repos = {
+        "stable": "https://kubernetes-charts.storage.googleapis.com/",
+    },
     visibility = ["//visibility:public"],
 )

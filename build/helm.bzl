@@ -9,8 +9,30 @@ def _helm_package_impl(ctx):
     package = ctx.label.package.split("/")
     chart_name = package[len(package) - 1]
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
+
+    repos = []
+    if ctx.attr.repos:
+        for k,v in ctx.attr.repos.items():
+            repo_out = ctx.actions.declare_directory("repo-%s-%s.out" % (k, ctx.label.name))
+            ctx.actions.run(
+                progress_message = "Adding Helm repository %s for %s" % (v, ctx.label.package),
+                inputs = ctx.files.srcs,
+                outputs = [repo_out],
+                executable = info.tool_path,
+                arguments = ["repo", "add", k, v],
+            )
+            repos += [repo_out]
+
+    dep_out = ctx.actions.declare_directory("deps-%s.out" % ctx.label.name)
+    ctx.actions.run(
+        progress_message = "Resolving dependencies for %s" % ctx.label.package,
+        inputs = ctx.files.srcs + repos,
+        outputs = [dep_out],
+        executable = info.tool_path,
+        arguments = ["dependency", "build", ctx.file.chart_yaml.dirname, "--log-file=%s" % dep_out],
+    )
+
     out_file = ctx.actions.declare_file("%s-%s.tgz" % (chart_name, ctx.attr.version))
-    print ("path: %s" % info.tool_path)
     args = ctx.actions.args()
     args.add("package")
     args.add("--version=%s" % ctx.attr.version)
@@ -20,7 +42,7 @@ def _helm_package_impl(ctx):
     args.add(ctx.file.chart_yaml.dirname)
     ctx.actions.run(
         progress_message = "Running Helm package for %s" % ctx.label.package,
-        inputs = ctx.files.srcs,
+        inputs = ctx.files.srcs + [dep_out],
         outputs = [out_file],
         executable = info.tool_path,
         arguments = [args],
@@ -47,6 +69,11 @@ helm_package = rule(
         "app_version": attr.string(
             doc = "App version",
             mandatory = True,
+        ),
+        "repos": attr.string_dict(
+            allow_empty = True,
+            doc = "Chart repositories for dependencies",
+            mandatory = False,
         ),
     },
     toolchains = ["//build/toolchains/helm:toolchain_type"],
