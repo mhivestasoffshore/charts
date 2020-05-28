@@ -5,34 +5,73 @@ load(
     "copy",
 )
 
+def helm_repos(ctx, srcs, repos):
+    info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
+    is_windows = select({
+        "@bazel_tools//src/conditions:host_windows": True,
+        "//conditions:default": False,
+    })
+    repo_config = ctx.actions.declare_file("repositories-%s.yaml" % ctx.label.name)
+    if is_windows:
+        bat = ctx.actions.declare_file("helm-add-repo-%s.bat" % ctx.label.name)
+        content = ""
+        for name,url in repos.items():
+            content += "@%s repo add --repository-config=%s %s %s\r\n" % (
+                info.tool_path.path.replace("/", "\\"),
+                repo_config.path.replace("/", "\\"),
+                name,
+                url,
+            )
+        ctx.actions.write(
+            content = content,
+            is_executable = True,
+            output = bat,
+        )
+        ctx.actions.run(
+            progress_message = "Adding Helm repositories for %s" % ctx.label.package,
+            inputs = srcs,
+            outputs = [repo_config],
+            tools = [bat],
+            executable = "cmd.exe",
+            arguments = ["/C", bat.path.replace("/", "\\")],
+            use_default_shell_env = True,
+        )
+    else:
+        command = ""
+        for name,url in repos.items():
+            command += "./%s repo add --repository-config=%s %s %s\n" % (
+                info.tool_path.path,
+                repo_config.path,
+                name,
+                url,
+            )
+        ctx.actions.run_shell(
+            progress_message = "Adding Helm repositories for %s" % ctx.label.package,
+            inputs = srcs,
+            outputs = [repo_config],
+            command = command,
+            use_default_shell_env = True,
+        )
+
+    return repo_config
+
 def _helm_package_impl(ctx):
     package = ctx.label.package.split("/")
     chart_name = package[len(package) - 1]
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
 
-    repos = []
-    repo_config = ctx.actions.declare_file("repositories-%s.yaml" % ctx.label.name)
-    ctx.actions.write(repo_config, "")
+    deps = []
     if ctx.attr.repos:
-        for k,v in ctx.attr.repos.items():
-            repo_out = ctx.actions.declare_directory("repo-%s-%s.out" % (k, ctx.label.name))
-            ctx.actions.run(
-                progress_message = "Adding Helm repository %s for %s" % (v, ctx.label.package),
-                inputs = ctx.files.srcs,
-                outputs = [repo_out],
-                executable = info.tool_path,
-                arguments = ["repo", "add", k, v, "--repository-config=%s" % repo_config.path],
-            )
-            repos += [repo_out]
-
-    dep_out = ctx.actions.declare_directory("deps-%s.out" % ctx.label.name)
-    ctx.actions.run(
-        progress_message = "Resolving dependencies for %s" % ctx.label.package,
-        inputs = ctx.files.srcs + repos,
-        outputs = [dep_out],
-        executable = info.tool_path,
-        arguments = ["dependency", "build", ctx.file.chart_yaml.dirname, "--repository-config=%s" % repo_config.path],
-    )
+        repo_config = helm_repos(ctx, ctx.files.srcs, ctx.attr.repos)
+        dep_out = ctx.actions.declare_directory("deps-%s.out" % ctx.label.name)
+        ctx.actions.run(
+            progress_message = "Resolving dependencies for %s" % ctx.label.package,
+            inputs = ctx.files.srcs + [repo_config],
+            outputs = [dep_out],
+            executable = info.tool_path,
+            arguments = ["dependency", "build", ctx.file.chart_yaml.dirname, "--repository-config=%s" % repo_config.path],
+        )
+        deps += [dep_out]
 
     out_file = ctx.actions.declare_file("%s-%s.tgz" % (chart_name, ctx.attr.version))
     args = ctx.actions.args()
@@ -44,7 +83,7 @@ def _helm_package_impl(ctx):
     args.add(ctx.file.chart_yaml.dirname)
     ctx.actions.run(
         progress_message = "Running Helm package for %s" % ctx.label.package,
-        inputs = ctx.files.srcs + [dep_out],
+        inputs = ctx.files.srcs + deps,
         outputs = [out_file],
         executable = info.tool_path,
         arguments = [args],
