@@ -10,12 +10,20 @@ def _helm_package_impl(ctx):
     chart_name = package[len(package) - 1]
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
     out_file = ctx.actions.declare_file("%s-%s.tgz" % (chart_name, ctx.attr.version))
+    print ("path: %s" % info.tool_path)
+    args = ctx.actions.args()
+    args.add("package")
+    args.add("--version=%s" % ctx.attr.version)
+    args.add("--app-version=%s" % ctx.attr.app_version)
+    args.add("-d")
+    args.add(out_file.dirname)
+    args.add(ctx.file.chart_yaml.dirname)
     ctx.actions.run(
         progress_message = "Running Helm package for %s" % ctx.label.package,
         inputs = ctx.files.srcs,
         outputs = [out_file],
-        executable = "%s" % info.tool_path,
-        arguments = ["package", "--version=%s" % ctx.attr.version, "--app-version=%s" % ctx.attr.app_version, "-d", out_file.dirname, ctx.file.chart_yaml.dirname],
+        executable = info.tool_path,
+        arguments = [args],
     )
     return [DefaultInfo(files = depset([out_file]))]
 
@@ -70,7 +78,7 @@ def _helm_index_impl(ctx):
         progress_message = "Running Helm index for %s" % ctx.label.package,
         inputs = inputs,
         outputs = [index_file],
-        executable = "%s" % info.tool_path,
+        executable = info.tool_path,
         arguments = [args]
     )
     return [DefaultInfo(files = depset(out))]

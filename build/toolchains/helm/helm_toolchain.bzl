@@ -12,19 +12,18 @@ HelmInfo = provider(
 def _helm_toolchain_impl(ctx):
     toolchain_info = platform_common.ToolchainInfo(
         helminfo = HelmInfo(
-            tool_path = ctx.file.tool_path.path,
+            tool_path = ctx.executable.tool_path,
         ),
     )
-    environment_info = platform_common.TemplateVariableInfo({
-        "HELM_CMD": ctx.file.tool_path.path,
-    })
-    return [toolchain_info, environment_info]
+    return [toolchain_info]
 
 helm_toolchain = rule(
     implementation = _helm_toolchain_impl,
     attrs = {
         "tool_path": attr.label(
             allow_single_file = True,
+            cfg = "host",
+            executable = True,            
         ),
     },
 )
