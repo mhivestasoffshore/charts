@@ -5,14 +5,16 @@ This module implements the helm toolchain rule.
 HelmInfo = provider(
     doc = "Information on Helm command line tool",
     fields = {
-        "tool_path": "Path to the helm executable",
+        "tool": "Target pointing to Helm executable",
+        "cmd": "File pointing to Helm executable"
     }
 )
 
 def _helm_toolchain_impl(ctx):
     toolchain_info = platform_common.ToolchainInfo(
         helminfo = HelmInfo(
-            tool_path = ctx.executable.tool_path,
+            tool = ctx.attr.tool_path,
+            cmd = ctx.executable.tool_path,
         ),
     )
     return [toolchain_info]

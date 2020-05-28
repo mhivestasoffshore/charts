@@ -13,7 +13,7 @@ def helm_repos(ctx, srcs, repos):
         content = ""
         for name,url in repos.items():
             content += "@%s repo add --repository-config=%s %s %s\r\n" % (
-                info.tool_path.path.replace("/", "\\"),
+                info.cmd.path.replace("/", "\\"),
                 repo_config.path.replace("/", "\\"),
                 name,
                 url,
@@ -27,7 +27,7 @@ def helm_repos(ctx, srcs, repos):
             progress_message = "Adding Helm repositories for %s" % ctx.label.package,
             inputs = srcs,
             outputs = [repo_config],
-            tools = [bat],
+            tools = [bat,info.cmd],
             executable = "cmd.exe",
             arguments = ["/C", bat.path.replace("/", "\\")],
             use_default_shell_env = True,
@@ -36,19 +36,19 @@ def helm_repos(ctx, srcs, repos):
         command = "pwd\nls -l\n"
         for name,url in repos.items():
             command += "$(location %s) repo add --repository-config=%s %s %s\n" % (
-                info.tool_path.path,
+                info.tool.label,
                 repo_config.path,
                 name,
                 url,
             )
-        command = ctx.expand_location(command, [info.tool_path])
+        command = ctx.expand_location(command, [info.tool])
         print ("command=%s" % command)
         ctx.actions.run_shell(
             progress_message = "Adding Helm repositories for %s" % ctx.label.package,
             inputs = srcs,
             outputs = [repo_config],
             command = command,
-            tools = [info.tool_path],
+            tools = [info.cmd],
             use_default_shell_env = True,
         )
 
@@ -67,7 +67,7 @@ def _helm_package_impl(ctx):
             progress_message = "Resolving dependencies for %s" % ctx.label.package,
             inputs = ctx.files.srcs + [repo_config],
             outputs = [dep_out],
-            executable = info.tool_path,
+            executable = info.cmd,
             arguments = ["dependency", "build", ctx.file.chart_yaml.dirname, "--repository-config=%s" % repo_config.path],
         )
         deps += [dep_out]
@@ -84,7 +84,7 @@ def _helm_package_impl(ctx):
         progress_message = "Running Helm package for %s" % ctx.label.package,
         inputs = ctx.files.srcs + deps,
         outputs = [out_file],
-        executable = info.tool_path,
+        executable = info.cmd,
         arguments = [args],
     )
     return [DefaultInfo(files = depset([out_file]))]
@@ -160,7 +160,7 @@ def _helm_index_impl(ctx):
         progress_message = "Running Helm index for %s" % ctx.label.package,
         inputs = inputs,
         outputs = [index_file],
-        executable = info.tool_path,
+        executable = info.cmd,
         arguments = [args]
     )
     return [DefaultInfo(files = depset(out))]
