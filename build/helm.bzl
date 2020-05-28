@@ -7,12 +7,8 @@ load(
 
 def helm_repos(ctx, srcs, repos):
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
-    is_windows = select({
-        "@bazel_tools//src/conditions:host_windows": True,
-        "//conditions:default": False,
-    })
     repo_config = ctx.actions.declare_file("repositories-%s.yaml" % ctx.label.name)
-    if is_windows:
+    if ctx.attr.is_windows:
         bat = ctx.actions.declare_file("helm-add-repo-%s.bat" % ctx.label.name)
         content = ""
         for name,url in repos.items():
@@ -90,7 +86,7 @@ def _helm_package_impl(ctx):
     )
     return [DefaultInfo(files = depset([out_file]))]
 
-helm_package = rule(
+_helm_package = rule(
     implementation = _helm_package_impl,
     attrs = {
         "srcs": attr.label_list(
@@ -116,9 +112,24 @@ helm_package = rule(
             doc = "Chart repositories for dependencies",
             mandatory = False,
         ),
+        "is_windows": attr.bool(mandatory = True),
     },
     toolchains = ["//build/toolchains/helm:toolchain_type"],
 )
+
+def helm_package(srcs, chart_yaml, version, app_version, repos = {}, **kwargs):
+    _helm_package(
+        srcs = srcs,
+        chart_yaml = chart_yaml,
+        version = version,
+        app_version = app_version,
+        repos = repos,
+        is_windows = select({
+                "@bazel_tools//src/conditions:host_windows": True,
+                "//conditions:default": False,
+            }),
+        **kwargs,
+    )
 
 def _helm_index_impl(ctx):
     inputs = []
