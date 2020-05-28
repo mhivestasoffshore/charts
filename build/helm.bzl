@@ -11,6 +11,8 @@ def _helm_package_impl(ctx):
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
 
     repos = []
+    repo_config = ctx.actions.declare_file("repositories-%s.yaml" % ctx.label.name)
+    ctx.actions.write(repo_config, "")
     if ctx.attr.repos:
         for k,v in ctx.attr.repos.items():
             repo_out = ctx.actions.declare_directory("repo-%s-%s.out" % (k, ctx.label.name))
@@ -19,7 +21,7 @@ def _helm_package_impl(ctx):
                 inputs = ctx.files.srcs,
                 outputs = [repo_out],
                 executable = info.tool_path,
-                arguments = ["repo", "add", k, v],
+                arguments = ["repo", "add", k, v, "--repository-config=%s" % repo_config.path],
             )
             repos += [repo_out]
 
@@ -29,7 +31,7 @@ def _helm_package_impl(ctx):
         inputs = ctx.files.srcs + repos,
         outputs = [dep_out],
         executable = info.tool_path,
-        arguments = ["dependency", "build", ctx.file.chart_yaml.dirname],
+        arguments = ["dependency", "build", ctx.file.chart_yaml.dirname, "--repository-config=%s" % repo_config.path],
     )
 
     out_file = ctx.actions.declare_file("%s-%s.tgz" % (chart_name, ctx.attr.version))
