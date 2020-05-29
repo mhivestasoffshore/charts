@@ -111,7 +111,7 @@ data:
           host: '{{ .Release.Name }}-memcached-index-writes.{{ .Release.Namespace }}.svc.cluster.local'
           service: 'memcache'
           consistent_hash: true
-      max_look_back_period: 0
+      max_look_back_period: '0s'
 
     schema_config:
       configs:
@@ -124,7 +124,7 @@ data:
           period: '{{ .Values.config.index_period_hours }}h'
 
     table_manager:
-      retention_period: 0
+      retention_period: '0s'
       retention_deletes_enabled: false
       creation_grace_period: '3h'
 
