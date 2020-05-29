@@ -3,14 +3,43 @@ entries:
   kafdrop:
   - apiVersion: v1
     appVersion: 3.24.0
-    created: "2020-05-06T12:12:55.2946322+02:00"
+    created: "2020-05-29T09:27:40.9934926+02:00"
     description: Kafdrop – Kafka Web UI
-    digest: d16855fe485f09b7c8f3554ef77dc97f3be27be03c80717c7221ccb69c883812
+    digest: a9b30bd03508502142906148bd90feb2b309e3a349592c783dff7612194a4b81
     name: kafdrop
     urls:
     - https://mhivestasoffshore.github.io/charts/kafdrop-0.2.0.tgz
     version: 0.2.0
   loki:
+  - apiVersion: v1
+    appVersion: 1.5.0
+    created: "2020-05-29T09:27:40.9964929+02:00"
+    dependencies:
+    - name: consul
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.9.*
+    - alias: memcached
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-index-queries
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-index-writes
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-frontend
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    description: Grafana Loki
+    digest: 7db918cacbdef6e0eecd4c828600bfcda59e29111839426f1734526284940630
+    name: loki
+    urls:
+    - https://mhivestasoffshore.github.io/charts/loki-0.1.0.tgz
+    version: 0.1.0
   - apiVersion: v1
     appVersion: 1.4.1
     created: "2020-05-06T12:12:55.3127643+02:00"
@@ -31,6 +60,15 @@ entries:
     version: 0.0.1
   promxy:
   - apiVersion: v1
+    appVersion: 0.0.59
+    created: "2020-05-29T09:27:40.9974925+02:00"
+    description: Promxy - An aggregating proxy to enable HA prometheus
+    digest: 2c4c83cd3734ee8ee5b8664ac6f6ccd259782f0bd9ecc03f57fdbf294bc9b4ff
+    name: promxy
+    urls:
+    - https://mhivestasoffshore.github.io/charts/promxy-0.1.0.tgz
+    version: 0.1.0
+  - apiVersion: v1
     appVersion: 0.0.58
     created: "2020-05-06T12:12:55.3247666+02:00"
     description: Promxy - An aggregating proxy to enable HA prometheus
@@ -48,4 +86,4 @@ entries:
     urls:
     - https://mhivestasoffshore.github.io/charts/promxy-0.0.1.tgz
     version: 0.0.1
-generated: "2020-05-06T12:12:55.2707756+02:00"
+generated: "2020-05-29T09:27:40.9924939+02:00"
