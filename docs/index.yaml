@@ -3,14 +3,43 @@ entries:
   kafdrop:
   - apiVersion: v1
     appVersion: 3.24.0
-    created: "2020-05-29T09:27:40.9934926+02:00"
+    created: "2020-05-29T09:55:34.3131905+02:00"
     description: Kafdrop – Kafka Web UI
-    digest: a9b30bd03508502142906148bd90feb2b309e3a349592c783dff7612194a4b81
+    digest: 696eeb9d375d258e04bd9eb8cb7cbb5b11af63f2e60ce87d6ceb921c3a4d3261
     name: kafdrop
     urls:
     - https://mhivestasoffshore.github.io/charts/kafdrop-0.2.0.tgz
     version: 0.2.0
   loki:
+  - apiVersion: v1
+    appVersion: 1.5.0
+    created: "2020-05-29T09:55:34.3181909+02:00"
+    dependencies:
+    - name: consul
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.9.*
+    - alias: memcached
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-index-queries
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-index-writes
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-frontend
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    description: Grafana Loki
+    digest: 1a6827825794573c117c30f75a634efe12faa664603cb720696d0de482d593d2
+    name: loki
+    urls:
+    - https://mhivestasoffshore.github.io/charts/loki-0.1.1.tgz
+    version: 0.1.1
   - apiVersion: v1
     appVersion: 1.5.0
     created: "2020-05-29T09:27:40.9964929+02:00"
@@ -61,9 +90,9 @@ entries:
   promxy:
   - apiVersion: v1
     appVersion: 0.0.59
-    created: "2020-05-29T09:27:40.9974925+02:00"
+    created: "2020-05-29T09:55:34.3181909+02:00"
     description: Promxy - An aggregating proxy to enable HA prometheus
-    digest: 2c4c83cd3734ee8ee5b8664ac6f6ccd259782f0bd9ecc03f57fdbf294bc9b4ff
+    digest: aa0beba75e6162260dd2c0b4dc6bcfa93ccf259833835354520aa9b70477e009
     name: promxy
     urls:
     - https://mhivestasoffshore.github.io/charts/promxy-0.1.0.tgz
@@ -86,4 +115,4 @@ entries:
     urls:
     - https://mhivestasoffshore.github.io/charts/promxy-0.0.1.tgz
     version: 0.0.1
-generated: "2020-05-29T09:27:40.9924939+02:00"
+generated: "2020-05-29T09:55:34.3121859+02:00"
