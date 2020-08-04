@@ -63,7 +63,7 @@ data:
           kvstore:
             store: 'consul'
             consul:
-              host: '{{ .Release.Name }}-consul.{{ .Release.Namespace }}.svc.cluster.local:8500'
+              host: '{{ .Release.Name }}-consul-server.{{ .Release.Namespace }}.svc.cluster.local:8500'
         num_tokens: 512
         heartbeat_period: '5s'
         join_after: '30s'
@@ -135,7 +135,7 @@ data:
         kvstore:
           store: 'consul'
           consul:
-            host: '{{ .Release.Name }}-consul.{{ .Release.Namespace }}.svc.cluster.local:8500'
+            host: '{{ .Release.Name }}-consul-server.{{ .Release.Namespace }}.svc.cluster.local:8500'
 
   overrides.yaml: |
     overrides: {}

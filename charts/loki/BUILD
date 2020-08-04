@@ -1,6 +1,6 @@
 load("//build:helm.bzl", "helm_package")
 
-VERSION="0.1.2"
+VERSION="0.1.3"
 APP_VERSION="1.5.0"
 
 helm_package(
