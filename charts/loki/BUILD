@@ -11,6 +11,7 @@ helm_package(
     app_version = APP_VERSION,
     repos = {
         "stable": "https://kubernetes-charts.storage.googleapis.com/",
+        "hashicorp": "https://helm.releases.hashicorp.com",
     },
     visibility = ["//visibility:public"],
 )
