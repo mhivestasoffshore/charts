@@ -11,6 +11,7 @@ config:
 
   cassandra:
     addresses: ''
+    replication_factor: 2
 
   azure:
     account_name: ''

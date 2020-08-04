@@ -33,6 +33,7 @@ helm upgrade --install loki
 | `config.replication_factor` | Replication factor for ingestor | `3` |
 | `config.index_period_hours` | Retention period (168h ~ 30 days) | `168` |
 | `config.cassandra.addresses` | Addresses for Cassandra cluster to store index | `''` |
+| `config.cassandra.replication_factor` | Replication factor for Cassandra keyspace | `2` |
 | `config.azure.account_name` | Azure Storage Account name | `''` |
 | `config.azure.container_name` | Azure Storage Account blob container name (must be created in advance) | `''` |
 | `config.azure.account_key` | Access key for Azure Storage Account | `''` |

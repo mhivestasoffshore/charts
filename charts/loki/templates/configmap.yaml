@@ -86,6 +86,7 @@ data:
       cassandra:
         addresses: {{ .Values.config.cassandra.addresses | quote }}
         keyspace: lokiindex
+        replication_factor: {{ .Values.config.cassandra.replication_factor }}
 
       azure:
         container_name: {{ .Values.config.azure.container_name | quote }}
