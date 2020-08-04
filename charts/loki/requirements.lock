@@ -1,7 +1,7 @@
 dependencies:
 - name: consul
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  version: 3.9.5
+  repository: https://helm.releases.hashicorp.com/
+  version: 0.24.*
 - name: memcached
   repository: https://kubernetes-charts.storage.googleapis.com/
   version: 3.2.3
@@ -14,5 +14,5 @@ dependencies:
 - name: memcached
   repository: https://kubernetes-charts.storage.googleapis.com/
   version: 3.2.3
-digest: sha256:2f4a1feba2ffb62f3274018871df27432e992dd18b6f87cdae5ff13b29026794
-generated: "2020-05-28T09:52:25.4368803+02:00"
+digest: sha256:9deb2ade407ed26e69b72b2429f902ffa718df684d6f1392b8b1fcfc33892899
+generated: "2020-08-04T12:55:33.7030371+02:00"
