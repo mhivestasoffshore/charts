@@ -194,12 +194,12 @@ def helm_package(srcs, chart_yaml, version, app_version, repos = {}, **kwargs):
 
 def _helm_index_impl(ctx):
     inputs = []
-    out = []
+    outputs = []
     for f in ctx.files.packages:
         out_file = ctx.actions.declare_file("%s/%s" % (ctx.label.name, f.basename))
         copy(ctx, f, out_file)
         inputs += [f]
-        out += [out_file]
+        outputs += [out_file]
 
     args = ctx.actions.args()
     args.add("repo")
@@ -210,7 +210,7 @@ def _helm_index_impl(ctx):
     if ctx.attr.url:
         args.add("--url=%s" % ctx.attr.url)
     index_file = ctx.actions.declare_file("%s/index.yaml" % ctx.label.name)
-    out += [index_file]
+    outputs += [index_file]
     args.add(index_file.dirname)
 
     info = ctx.toolchains["//build/toolchains/helm:toolchain_type"].helminfo
@@ -221,7 +221,7 @@ def _helm_index_impl(ctx):
         executable = info.cmd,
         arguments = [args]
     )
-    return [DefaultInfo(files = depset(out))]
+    return [DefaultInfo(files = depset(outputs))]
 
 helm_index = rule(
     implementation = _helm_index_impl,
