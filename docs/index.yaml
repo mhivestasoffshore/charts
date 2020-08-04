@@ -3,7 +3,7 @@ entries:
   kafdrop:
   - apiVersion: v1
     appVersion: 3.24.0
-    created: "2020-05-29T09:55:34.3131905+02:00"
+    created: "2020-08-04T13:05:59.1238191+02:00"
     description: Kafdrop – Kafka Web UI
     digest: 696eeb9d375d258e04bd9eb8cb7cbb5b11af63f2e60ce87d6ceb921c3a4d3261
     name: kafdrop
@@ -13,7 +13,36 @@ entries:
   loki:
   - apiVersion: v1
     appVersion: 1.5.0
-    created: "2020-05-29T09:55:34.3181909+02:00"
+    created: "2020-08-04T13:05:59.1337797+02:00"
+    dependencies:
+    - name: consul
+      repository: https://helm.releases.hashicorp.com/
+      version: 0.24.*
+    - alias: memcached
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-index-queries
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-index-writes
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    - alias: memcached-frontend
+      name: memcached
+      repository: https://kubernetes-charts.storage.googleapis.com/
+      version: 3.2.*
+    description: Grafana Loki
+    digest: 5692e308e559ca68c4d19a3d36a6290b569ddddc31cb71c64efbf45ec90b8ed1
+    name: loki
+    urls:
+    - https://mhivestasoffshore.github.io/charts/loki-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v1
+    appVersion: 1.5.0
+    created: "2020-08-04T13:05:59.126821+02:00"
     dependencies:
     - name: consul
       repository: https://kubernetes-charts.storage.googleapis.com/
@@ -90,7 +119,7 @@ entries:
   promxy:
   - apiVersion: v1
     appVersion: 0.0.59
-    created: "2020-05-29T09:55:34.3181909+02:00"
+    created: "2020-08-04T13:05:59.1357806+02:00"
     description: Promxy - An aggregating proxy to enable HA prometheus
     digest: aa0beba75e6162260dd2c0b4dc6bcfa93ccf259833835354520aa9b70477e009
     name: promxy
@@ -115,4 +144,4 @@ entries:
     urls:
     - https://mhivestasoffshore.github.io/charts/promxy-0.0.1.tgz
     version: 0.0.1
-generated: "2020-05-29T09:55:34.3121859+02:00"
+generated: "2020-08-04T13:05:59.1178168+02:00"
