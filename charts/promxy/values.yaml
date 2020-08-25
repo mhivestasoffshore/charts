@@ -2,7 +2,7 @@
 
 image:
   repository: quay.io/jacksontj/promxy
-  tag: v0.0.59
+  tag: v0.0.60
 
 replicaCount: 1
 
