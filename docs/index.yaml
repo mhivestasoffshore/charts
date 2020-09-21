@@ -3,6 +3,15 @@ entries:
   kafdrop:
   - apiVersion: v1
     appVersion: 3.27.0
+    created: "2020-09-21T14:15:37.5976154+02:00"
+    description: Kafdrop – Kafka Web UI
+    digest: 0b52a020e4e9fe920988d40fe6c5af58274d3e4f1c86f4df5ae6907f7f109c13
+    name: kafdrop
+    urls:
+    - https://mhivestasoffshore.github.io/charts/kafdrop-0.3.1.tgz
+    version: 0.3.1
+  - apiVersion: v1
+    appVersion: 3.27.0
     created: "2020-09-17T09:49:38.5103512+02:00"
     description: Kafdrop – Kafka Web UI
     digest: 4ec770603716b34d2d3a766d716a7ba180934ded6783967cba2b72e6266e511c
@@ -22,7 +31,7 @@ entries:
   loki:
   - apiVersion: v1
     appVersion: 1.5.0
-    created: "2020-09-17T09:49:38.5173562+02:00"
+    created: "2020-09-21T14:15:37.6115343+02:00"
     dependencies:
     - name: consul
       repository: https://helm.releases.hashicorp.com/
@@ -157,7 +166,7 @@ entries:
   promxy:
   - apiVersion: v1
     appVersion: 0.0.60
-    created: "2020-09-17T09:49:38.5183541+02:00"
+    created: "2020-09-21T14:15:37.6134924+02:00"
     description: Promxy - An aggregating proxy to enable HA prometheus
     digest: 70fde284007e0f105ac2487608b7733a97bc224333bfa1e87b27373b626dc0ee
     name: promxy
@@ -191,4 +200,4 @@ entries:
     urls:
     - https://mhivestasoffshore.github.io/charts/promxy-0.0.1.tgz
     version: 0.0.1
-generated: "2020-09-17T09:49:38.5103512+02:00"
+generated: "2020-09-21T14:15:37.5966175+02:00"
