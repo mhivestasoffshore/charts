@@ -2,4 +2,4 @@ apiVersion: v1
 appVersion: 3.27.0
 description: Kafdrop – Kafka Web UI
 name: kafdrop
-version: 0.3.0
+version: 0.3.1
